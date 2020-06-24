@@ -10,7 +10,6 @@
 
 	"dependencies":
 	{
-		"com.helvest.sqlitelocalcommunicator": "https://github.com/Helvest/sqlitelocalcommunicator.git"
 	},
 
 	"keywords":
