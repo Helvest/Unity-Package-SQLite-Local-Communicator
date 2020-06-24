@@ -1,0 +1,34 @@
+{
+
+	"name": "com.helvest.sqlitelocalcommunicator",
+
+	"version": "1.0.0",
+
+	"displayName": "SQLite Local Communicator",
+
+	"description": "SQLite plugin and C# scripts to create, read and write databases locally",
+
+	"dependencies":
+	{
+		"com.helvest.sqlitelocalcommunicator": "https://github.com/Helvest/sqlitelocalcommunicator.git"
+	},
+
+	"keywords":
+	[
+		"helvest",
+
+		"sql",
+
+		"database",
+
+		"table"
+	],
+
+	"author":
+	{
+		"name": "Pedro Dominicé (Helvest)",
+
+		"url": "https://twitter.com/HelvestEpic"
+	}
+	
+}
