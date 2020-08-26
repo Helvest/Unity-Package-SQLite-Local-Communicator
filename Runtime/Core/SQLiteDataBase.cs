@@ -215,9 +215,9 @@ namespace SQLiteLocalCommunicator
 			}
 		}
 
-#endregion
+		#endregion
 
-#region Delete
+		#region Delete
 
 		protected void _DeleteAllData(string tableName)
 		{
@@ -229,9 +229,9 @@ namespace SQLiteLocalCommunicator
 			_CommandAndExecuteNonQuery($"DROP TABLE IF EXISTS {tableName}");
 		}
 
-#endregion
+		#endregion
 
-#region NumOfRows
+		#region NumOfRows
 
 		protected int _GetNumOfRows(string tableName)
 		{
@@ -240,7 +240,7 @@ namespace SQLiteLocalCommunicator
 			return data.Read() ? data.GetInt32(0) : 0;
 		}
 
-#endregion
+		#endregion
 
 	}
 }
