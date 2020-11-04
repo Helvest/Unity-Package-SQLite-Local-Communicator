@@ -86,8 +86,6 @@ namespace SQLiteLocalCommunicator
 
 		protected void _CommandAndExecuteNonQuery(string commandText)
 		{
-
-
 			var command = _connection.CreateCommand();
 
 			command.CommandText = commandText;
