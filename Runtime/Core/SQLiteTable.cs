@@ -5,25 +5,14 @@
 
 		#region Variables
 
-		public string TableName { get; protected set; }
+		public abstract string TableName { get; }
 
 		#endregion
 
 		#region Constructor
 
-		public SQLiteTable(string tableName, bool buildIn, string DbName) : base(buildIn, DbName)
+		public SQLiteTable(SQLiteDatabaseConfiguration configuration) : base(configuration)
 		{
-			_InitTable(tableName);
-		}
-
-		public SQLiteTable(string tableName, bool buildIn) : base(buildIn)
-		{
-			_InitTable(tableName);
-		}
-
-		private void _InitTable(string tableName)
-		{
-			TableName = tableName;
 			CreateTable();
 		}
 

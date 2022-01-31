@@ -13,30 +13,21 @@ namespace SQLiteLocalCommunicator
 
 		#region Variables
 
-		private const string databasesFolderName = "SQLiteDatabases";
+		public SQLiteDatabaseConfiguration Configuration { get; private set; } = default;
 
-		public string databaseName { get; private set; } = "Global";
+		public string DatabasePath { get; private set; } = default;
 
-		public string databasePath { get; private set; }
-
-		private IDbConnection _connection;
+		private SqliteConnection _connection = default;
 
 		#endregion
 
 		#region Constructor and Destructor
 
-		public SQLiteDatabase(bool buildIn)
+		public SQLiteDatabase(SQLiteDatabaseConfiguration configuration)
 		{
-			SetDatabasePath(buildIn);
+			Configuration = configuration;
 
-			Open();
-		}
-
-		public SQLiteDatabase(bool buildIn, string DbName)
-		{
-			databaseName = DbName;
-
-			SetDatabasePath(buildIn);
+			SetDatabasePath();
 
 			Open();
 		}
@@ -48,21 +39,18 @@ namespace SQLiteLocalCommunicator
 			_connection.Dispose();
 		}
 
-		private void SetDatabasePath(bool buildIn)
+		private void SetDatabasePath()
 		{
-			if (buildIn)
-			{
-				if (!Directory.Exists($"{Application.streamingAssetsPath}/{databasesFolderName}"))
-				{
-					Directory.CreateDirectory($"{Application.streamingAssetsPath}/{databasesFolderName}");
-				}
+			
 
-				databasePath = $"URI=file:{Application.streamingAssetsPath}/{databasesFolderName}/{databaseName}.db";
-			}
-			else
+			var DirectoryPath = Configuration.DirectoryPath;
+
+			if (!Directory.Exists(DirectoryPath))
 			{
-				databasePath = $"URI=file:{Application.persistentDataPath}/{databaseName}.db";
+				Directory.CreateDirectory(DirectoryPath);
 			}
+
+			DatabasePath = $"URI=file:{Configuration.FullPath}";
 		}
 
 		#endregion
@@ -71,7 +59,7 @@ namespace SQLiteLocalCommunicator
 
 		private void Open()
 		{
-			_connection = new SqliteConnection(databasePath);
+			_connection = new SqliteConnection(DatabasePath);
 			_connection.Open();
 		}
 
@@ -111,7 +99,7 @@ namespace SQLiteLocalCommunicator
 			{
 				return command.ExecuteReader();
 			}
-			catch (System.Exception)
+			catch (Exception)
 			{
 				Debug.LogError(commandText);
 			}

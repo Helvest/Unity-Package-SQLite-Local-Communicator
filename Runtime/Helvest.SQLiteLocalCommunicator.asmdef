@@ -1,5 +1,6 @@
 {
     "name": "Helvest.SQLiteLocalCommunicator",
+    "rootNamespace": "SQLiteLocalCommunicator",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
