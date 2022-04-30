@@ -11,7 +11,7 @@ namespace SQLiteLocalCommunicator
 	public abstract class SQLiteDatabase
 	{
 
-		#region Variables
+		#region Fields
 
 		public SQLiteDatabaseConfiguration Configuration { get; private set; } = default;
 

@@ -3,7 +3,7 @@
 	public abstract class SQLiteTable : SQLiteDatabase
 	{
 
-		#region Variables
+		#region Fields
 
 		public abstract string TableName { get; }
 
