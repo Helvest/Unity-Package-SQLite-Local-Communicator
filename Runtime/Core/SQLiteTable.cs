@@ -1,4 +1,6 @@
-﻿namespace SQLiteLocalCommunicator
+﻿using EasyPath;
+
+namespace SQLiteLocalCommunicator
 {
 	public abstract class SQLiteTable : SQLiteDatabase
 	{
@@ -11,7 +13,7 @@
 
 		#region Constructor
 
-		public SQLiteTable(SQLiteDatabaseConfiguration configuration) : base(configuration)
+		public SQLiteTable(IPath path) : base(path)
 		{
 			CreateTable();
 		}

@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using Mono.Data.Sqlite;
 using UnityEngine;
+using EasyPath;
 
 namespace SQLiteLocalCommunicator
 {
@@ -13,7 +14,7 @@ namespace SQLiteLocalCommunicator
 
 		#region Fields
 
-		public SQLiteDatabaseConfiguration Configuration { get; private set; } = default;
+		public IPath Path { get; private set; } = default;
 
 		public string DatabasePath { get; private set; } = default;
 
@@ -23,9 +24,9 @@ namespace SQLiteLocalCommunicator
 
 		#region Constructor and Destructor
 
-		public SQLiteDatabase(SQLiteDatabaseConfiguration configuration)
+		public SQLiteDatabase(IPath path)
 		{
-			Configuration = configuration;
+			Path = path;
 
 			SetDatabasePath();
 
@@ -41,16 +42,14 @@ namespace SQLiteLocalCommunicator
 
 		private void SetDatabasePath()
 		{
-			
-
-			var DirectoryPath = Configuration.DirectoryPath;
+			var DirectoryPath = Path.GetDirectoryPath();
 
 			if (!Directory.Exists(DirectoryPath))
 			{
 				Directory.CreateDirectory(DirectoryPath);
 			}
 
-			DatabasePath = $"URI=file:{Configuration.FullPath}";
+			DatabasePath = $"URI=file:{Path.GetFullPath()}";
 		}
 
 		#endregion
