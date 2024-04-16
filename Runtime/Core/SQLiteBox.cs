@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using Debug = UnityEngine.Debug;
 
 namespace SQLiteLocalCommunicator
 {
@@ -16,8 +15,6 @@ namespace SQLiteLocalCommunicator
 			{
 				if (defaultValue == null)
 				{
-					Debug.LogWarning("TEST: " + typeof(T).Name);
-
 					defaultValue = new T();
 				}
 
