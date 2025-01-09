@@ -14,11 +14,11 @@ namespace SQLiteLocalCommunicator
 
 		#region Fields
 
-		public IPath Path { get; private set; } = default;
+		public IPath Path { get; private set; }
 
-		public string DatabasePath { get; private set; } = default;
+		public string DatabasePath { get; private set; }
 
-		private SqliteConnection _connection = default;
+		private SqliteConnection _connection;
 
 		#endregion
 
