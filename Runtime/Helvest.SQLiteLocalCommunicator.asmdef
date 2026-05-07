@@ -1,16 +1,16 @@
 {
-    "name": "Helvest.SQLiteLocalCommunicator",
-    "rootNamespace": "SQLiteLocalCommunicator",
-    "references": [
-        "GUID:d7bdac9d9c8a1b24ebcf79fdbdcc236e"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Helvest.SQLiteLocalCommunicator",
+  "rootNamespace": "SQLiteLocalCommunicator",
+  "references": [
+    "GUID:d7bdac9d9c8a1b24ebcf79fdbdcc236e"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

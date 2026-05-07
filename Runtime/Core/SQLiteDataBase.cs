@@ -9,223 +9,222 @@ using EasyPath;
 
 namespace SQLiteLocalCommunicator
 {
-	public abstract class SQLiteDatabase
+public abstract class SQLiteDatabase
+{
+#region Fields
+
+	public IDirectoryPath Path { get; private set; }
+
+	public string DatabasePath { get; private set; }
+
+	private SqliteConnection _connection;
+
+#endregion
+
+#region Constructor and Destructor
+
+	public SQLiteDatabase(IDirectoryPath path)
 	{
+		Path = path;
 
-		#region Fields
+		SetDatabasePath();
 
-		public IPath Path { get; private set; }
+		Open();
+	}
 
-		public string DatabasePath { get; private set; }
+	~SQLiteDatabase()
+	{
+		Close();
 
-		private SqliteConnection _connection;
+		_connection.Dispose();
+	}
 
-		#endregion
+	private void SetDatabasePath()
+	{
+		var DirectoryPath = Path.GetDirectoryPath();
 
-		#region Constructor and Destructor
-
-		public SQLiteDatabase(IPath path)
+		if (!Directory.Exists(DirectoryPath))
 		{
-			Path = path;
-
-			SetDatabasePath();
-
-			Open();
+			Directory.CreateDirectory(DirectoryPath);
 		}
 
-		~SQLiteDatabase()
-		{
-			Close();
+		DatabasePath = $"URI=file:{Path.GetFullPath()}";
+	}
 
-			_connection.Dispose();
+#endregion
+
+#region Open and Close
+
+	private void Open()
+	{
+		_connection = new(DatabasePath);
+		_connection.Open();
+	}
+
+	public void Close()
+	{
+		_connection.Close();
+	}
+
+#endregion
+
+#region Commands
+
+	protected void _CommandAndExecuteNonQuery(string commandText)
+	{
+		var command = _connection.CreateCommand();
+
+		command.CommandText = commandText;
+
+		try
+		{
+			command.ExecuteNonQuery();
+		}
+		catch (Exception e)
+		{
+			Debug.LogError(e);
+			Debug.LogError(commandText);
+		}
+	}
+
+	protected IDataReader _CommandAndExecuteReader(string commandText)
+	{
+		var command = _connection.CreateCommand();
+
+		command.CommandText = commandText;
+
+		try
+		{
+			return command.ExecuteReader();
+		}
+		catch (Exception)
+		{
+			Debug.LogError(commandText);
 		}
 
-		private void SetDatabasePath()
+		return null;
+	}
+
+	public T[] CommandAndExecuteReaders<T>(string commandText) where T : SQLiteBox<T>, new()
+	{
+		return ProceedDataToBoxs<T>(_CommandAndExecuteReader(commandText));
+	}
+
+	public T CommandAndExecuteReader<T>(string commandText) where T : SQLiteBox<T>, new()
+	{
+		return ProceedDataToBox<T>(_CommandAndExecuteReader(commandText));
+	}
+
+	public bool CommandAndExecuteReader<T>(string commandText, out T box) where T : SQLiteBox<T>, new()
+	{
+		return ProceedDataToBox(_CommandAndExecuteReader(commandText), out box);
+	}
+
+#endregion
+
+#region ProceedDataToBox
+
+	public T ProceedDataToBox<T>(IDataReader reader) where T : SQLiteBox<T>, new()
+	{
+		return reader.Read() ? new T().Read(reader) : null;
+	}
+
+	public bool ProceedDataToBox<T>(IDataReader reader, out T box) where T : SQLiteBox<T>, new()
+	{
+		if (reader.Read())
 		{
-			var DirectoryPath = Path.GetDirectoryPath();
-
-			if (!Directory.Exists(DirectoryPath))
-			{
-				Directory.CreateDirectory(DirectoryPath);
-			}
-
-			DatabasePath = $"URI=file:{Path.GetFullPath()}";
+			box = new T().Read(reader);
+			return true;
 		}
 
-		#endregion
+		box = null;
+		return false;
+	}
 
-		#region Open and Close
+	public T[] ProceedDataToBoxs<T>(IDataReader reader) where T : SQLiteBox<T>, new()
+	{
+		var boxs = new List<T>();
 
-		private void Open()
+		while (reader.Read())
 		{
-			_connection = new SqliteConnection(DatabasePath);
-			_connection.Open();
+			boxs.Add(new T().Read(reader));
 		}
 
-		public void Close()
+		return boxs.ToArray();
+	}
+
+#endregion
+
+#region Get
+
+	protected T[] _GetAllData<T>(string tableName) where T : SQLiteBox<T>, new()
+	{
+		return CommandAndExecuteReaders<T>($"SELECT {SQLiteBox<T>.TKeys} FROM {tableName}");
+	}
+
+#endregion
+
+#region Insert
+
+	protected void _InsertData<T>(string tableName, params T[] boxs) where T : SQLiteBox<T>, new()
+	{
+		if (boxs.Length == 1)
 		{
-			_connection.Close();
+			_CommandAndExecuteNonQuery(
+				$"INSERT OR REPLACE INTO {tableName} ({SQLiteBox<T>.TKeys}) VALUES {boxs[0].Values}");
 		}
-
-		#endregion
-
-		#region Commands
-
-		protected void _CommandAndExecuteNonQuery(string commandText)
+		else if (boxs.Length > 1)
 		{
-			var command = _connection.CreateCommand();
-
-			command.CommandText = commandText;
-
-			try
-			{
-				command.ExecuteNonQuery();
-			}
-			catch (Exception e)
-			{
-				Debug.LogError(e);
-				Debug.LogError(commandText);
-			}
-		}
-
-		protected IDataReader _CommandAndExecuteReader(string commandText)
-		{
-			var command = _connection.CreateCommand();
-
-			command.CommandText = commandText;
-
-			try
-			{
-				return command.ExecuteReader();
-			}
-			catch (Exception)
-			{
-				Debug.LogError(commandText);
-			}
-
-			return null;
-		}
-
-		public T[] CommandAndExecuteReaders<T>(string commandText) where T : SQLiteBox<T>, new()
-		{
-			return ProceedDataToBoxs<T>(_CommandAndExecuteReader(commandText));
-		}
-
-		public T CommandAndExecuteReader<T>(string commandText) where T : SQLiteBox<T>, new()
-		{
-			return ProceedDataToBox<T>(_CommandAndExecuteReader(commandText));
-		}
-
-		public bool CommandAndExecuteReader<T>(string commandText, out T box) where T : SQLiteBox<T>, new()
-		{
-			return ProceedDataToBox(_CommandAndExecuteReader(commandText), out box);
-		}
-
-		#endregion
-
-		#region ProceedDataToBox
-
-		public T ProceedDataToBox<T>(IDataReader reader) where T : SQLiteBox<T>, new()
-		{
-			return reader.Read() ? new T().Read(reader) : null;
-		}
-
-		public bool ProceedDataToBox<T>(IDataReader reader, out T box) where T : SQLiteBox<T>, new()
-		{
-			if (reader.Read())
-			{
-				box = new T().Read(reader);
-				return true;
-			}
-
-			box = null;
-			return false;
-		}
-
-		public T[] ProceedDataToBoxs<T>(IDataReader reader) where T : SQLiteBox<T>, new()
-		{
-			var boxs = new List<T>();
-
-			while (reader.Read())
-			{
-				boxs.Add(new T().Read(reader));
-			}
-
-			return boxs.ToArray();
-		}
-
-		#endregion
-
-		#region Get
-
-		protected T[] _GetAllData<T>(string tableName) where T : SQLiteBox<T>, new()
-		{
-			return CommandAndExecuteReaders<T>($"SELECT {SQLiteBox<T>.TKeys} FROM {tableName}");
-		}
-
-		#endregion
-
-		#region Insert
-
-		protected void _InsertData<T>(string tableName, params T[] boxs) where T : SQLiteBox<T>, new()
-		{
-			if (boxs.Length == 1)
-			{
-				_CommandAndExecuteNonQuery($"INSERT OR REPLACE INTO {tableName} ({SQLiteBox<T>.TKeys}) VALUES {boxs[0].Values}");
-			}
-			else if (boxs.Length > 1)
-			{
-				var stringBuilder = new StringBuilder("BEGIN TRANSACTION; ");
+			var stringBuilder = new StringBuilder("BEGIN TRANSACTION; ");
 
 #if UNITY_EDITOR
-				stringBuilder.Append("\n\n");
-				string INSERT = $"INSERT OR REPLACE INTO {tableName} ({SQLiteBox<T>.TKeys}) \nVALUES ";
+			stringBuilder.Append("\n\n");
+			string INSERT = $"INSERT OR REPLACE INTO {tableName} ({SQLiteBox<T>.TKeys}) \nVALUES ";
 #else
 				string INSERT = $"INSERT OR REPLACE INTO {tableName} ({SQLiteBox<T>.TKeys}) VALUES ";
 #endif
 
-				foreach (var box in boxs)
-				{
-					stringBuilder.Append(INSERT);
-					stringBuilder.Append(box.Values);
-					stringBuilder.Append("; ");
+			foreach (var box in boxs)
+			{
+				stringBuilder.Append(INSERT);
+				stringBuilder.Append(box.Values);
+				stringBuilder.Append("; ");
 #if UNITY_EDITOR
-					stringBuilder.Append("\n\n");
+				stringBuilder.Append("\n\n");
 #endif
-				}
-
-				stringBuilder.Append("COMMIT;");
-
-				_CommandAndExecuteNonQuery(stringBuilder.ToString());
 			}
+
+			stringBuilder.Append("COMMIT;");
+
+			_CommandAndExecuteNonQuery(stringBuilder.ToString());
 		}
-
-		#endregion
-
-		#region Delete
-
-		protected void _DeleteAllData(string tableName)
-		{
-			_CommandAndExecuteNonQuery($"DELETE FROM {tableName}");
-		}
-
-		protected void _DeleteTable(string tableName)
-		{
-			_CommandAndExecuteNonQuery($"DROP TABLE IF EXISTS {tableName}");
-		}
-
-		#endregion
-
-		#region NumOfRows
-
-		protected int _GetNumOfRows(string tableName)
-		{
-			var data = _CommandAndExecuteReader($"SELECT COUNT() FROM {tableName}");
-
-			return data.Read() ? data.GetInt32(0) : 0;
-		}
-
-		#endregion
-
 	}
+
+#endregion
+
+#region Delete
+
+	protected void _DeleteAllData(string tableName)
+	{
+		_CommandAndExecuteNonQuery($"DELETE FROM {tableName}");
+	}
+
+	protected void _DeleteTable(string tableName)
+	{
+		_CommandAndExecuteNonQuery($"DROP TABLE IF EXISTS {tableName}");
+	}
+
+#endregion
+
+#region NumOfRows
+
+	protected int _GetNumOfRows(string tableName)
+	{
+		var data = _CommandAndExecuteReader($"SELECT COUNT() FROM {tableName}");
+
+		return data.Read() ? data.GetInt32(0) : 0;
+	}
+
+#endregion
+}
 }
